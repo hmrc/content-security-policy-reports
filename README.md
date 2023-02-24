@@ -1,7 +1,7 @@
 
 # content-security-policy-reports
 
-This is a placeholder README.md for a new repository
+PlatOps owned service to capture content-security-policy reports platform wide.
 
 ### License
 

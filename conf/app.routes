@@ -1,5 +1,3 @@
 # microservice specific routes
-
-->         /hmrc-frontend           hmrcfrontend.Routes
-GET        /                        uk.gov.hmrc.contentsecuritypolicyreports.controllers.HelloWorldController.helloWorld
-GET        /assets/*file            controllers.Assets.versioned(path = "/public", file: Asset)
++ nocsrf
+POST       /:service                uk.gov.hmrc.contentsecuritypolicyreports.controllers.ReportController.report(service: String)
