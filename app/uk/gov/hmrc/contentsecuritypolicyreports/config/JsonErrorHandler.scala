@@ -36,7 +36,7 @@ class JsonErrorHandler extends HttpErrorHandler {
 
   override def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = {
     logger.error(s"! Internal server error, for (${request.method}) [${request.uri}] -> ", exception)
-    val errorResponse = ErrorResponse(INTERNAL_SERVER_ERROR, exception.getMessage)
+    val errorResponse = ErrorResponse(INTERNAL_SERVER_ERROR, "Unexpected error")
 
     Future.successful(Status(errorResponse.statusCode)(toJson(errorResponse)))
   }

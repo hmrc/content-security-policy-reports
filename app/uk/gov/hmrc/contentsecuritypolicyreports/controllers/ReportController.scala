@@ -102,18 +102,18 @@ object ReportController {
     }
 
     implicit val reads: Reads[ScalaCSPReport] =
-      ( (__ \ "document-uri").read[String]
-      ~ (__ \ "violated-directive").read[String]
-      ~ (__ \ "blocked-uri").readNullable[String]
-      ~ (__ \ "original-policy").readNullable[String]
-      ~ (__ \ "effective-directive").readNullable[String]
-      ~ (__ \ "referrer").readNullable[String]
-      ~ (__ \ "disposition").readNullable[String]
-      ~ (__ \ "script-sample").readNullable[String]
-      ~ (__ \ "status-code").readNullable[Int]
-      ~ (__ \ "source-file").readNullable[String]
-      ~ (__ \ "line-number").readNullable[Long](longOrStringToLongRead)
-      ~ (__ \ "column-number").readNullable[Long](longOrStringToLongRead)
+      ( (__ \ "csp-report" \ "document-uri").read[String]
+      ~ (__ \ "csp-report" \ "violated-directive").read[String]
+      ~ (__ \ "csp-report" \ "blocked-uri").readNullable[String]
+      ~ (__ \ "csp-report" \ "original-policy").readNullable[String]
+      ~ (__ \ "csp-report" \ "effective-directive").readNullable[String]
+      ~ (__ \ "csp-report" \ "referrer").readNullable[String]
+      ~ (__ \ "csp-report" \ "disposition").readNullable[String]
+      ~ (__ \ "csp-report" \ "script-sample").readNullable[String]
+      ~ (__ \ "csp-report" \ "status-code").readNullable[Int]
+      ~ (__ \ "csp-report" \ "source-file").readNullable[String]
+      ~ (__ \ "csp-report" \ "line-number").readNullable[Long](longOrStringToLongRead)
+      ~ (__ \ "csp-report" \ "column-number").readNullable[Long](longOrStringToLongRead)
       )(ScalaCSPReport.apply _)
   }
 }

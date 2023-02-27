@@ -52,13 +52,15 @@ class ReportControllerSpec
           .post(
             s"""
                |{
-               |  "document-uri": "http://localhost",
-               |  "referrer": "",
-               |  "violated-directive": "script-src self",
-               |  "effective-directive": "frame-src",
-               |  "original-policy": "default-src  self; script-src self;",
-               |  "blocked-uri": "https://google.com",
-               |  "status-code": 200
+               |  "csp-report": {
+               |    "document-uri": "http://localhost",
+               |    "referrer": "",
+               |    "violated-directive": "script-src self",
+               |    "effective-directive": "frame-src",
+               |    "original-policy": "default-src  self; script-src self;",
+               |    "blocked-uri": "https://google.com",
+               |    "status-code": 200
+               |  }
                |}
                |""".stripMargin
           ).futureValue
