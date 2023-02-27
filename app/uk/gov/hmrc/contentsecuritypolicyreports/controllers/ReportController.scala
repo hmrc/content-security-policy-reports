@@ -44,7 +44,7 @@ class ReportController @Inject()(
         case JsSuccess(_, _) =>
           MDC.put("reporting-service", service)
 
-          cspLogger.info(json.toString)
+          cspLogger.info(Json.prettyPrint(json))
           Ok
         case JsError(errors) =>
           BadRequest(JsError.toJson(errors))
