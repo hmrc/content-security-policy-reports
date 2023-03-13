@@ -21,6 +21,7 @@ import play.api.Logger
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json._
 import play.api.mvc.{Action, MessagesControllerComponents}
+import play.api.http.HeaderNames
 import uk.gov.hmrc.contentsecuritypolicyreports.controllers.ReportController.ScalaCSPReport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -43,6 +44,9 @@ class ReportController @Inject()(
       json.validate[ScalaCSPReport] match {
         case JsSuccess(_, _) =>
           MDC.put("reporting-service", service)
+          request.headers.get(HeaderNames.USER_AGENT).foreach { userAgent =>
+            MDC.put("user-agent", userAgent)
+          }
 
           cspLogger.info(Json.prettyPrint(json))
           Ok
