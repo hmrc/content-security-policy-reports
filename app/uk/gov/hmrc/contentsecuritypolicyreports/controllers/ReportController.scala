@@ -43,12 +43,14 @@ class ReportController @Inject()(
       // only accept and log the payload if it's a valid CSP Report
       json.validate[ScalaCSPReport] match {
         case JsSuccess(_, _) =>
-          MDC.put("reporting-service", service)
-          request.headers.get(HeaderNames.USER_AGENT).foreach { userAgent =>
-            MDC.put("user-agent", userAgent)
+          val mdc =
+            ("reporting-service" -> service) ::
+              request.headers.get(HeaderNames.USER_AGENT).toList.flatMap { userAgent =>
+                List("user-agent" -> userAgent)
+              }
+          withMdc(mdc.toMap){
+            cspLogger.info(Json.prettyPrint(json))
           }
-
-          cspLogger.info(Json.prettyPrint(json))
           Ok
         case JsError(errors) =>
           BadRequest(JsError.toJson(errors))
@@ -56,6 +58,21 @@ class ReportController @Inject()(
     }
   }
 
+  private def withMdc[A](mdc: Map[String, String])(block: => A): A = {
+    val oldMdcData = MDC.getCopyOfContextMap
+    try {
+      mdc.foreach { case (k, v) =>
+        MDC.put(k, v)
+      }
+
+      block
+    } finally {
+      if (oldMdcData != null)
+        MDC.setContextMap(oldMdcData)
+      else
+        MDC.clear()
+    }
+   }
 }
 
 object ReportController {
