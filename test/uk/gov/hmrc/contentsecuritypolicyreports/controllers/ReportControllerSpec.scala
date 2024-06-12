@@ -22,7 +22,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.ws.WSClient
+import play.api.libs.ws.{WSClient, writeableOf_String}
 import play.api.test.Helpers._
 
 class ReportControllerSpec
@@ -30,8 +30,7 @@ class ReportControllerSpec
      with Matchers
      with GuiceOneServerPerSuite
      with ScalaFutures
-     with IntegrationPatience {
-
+     with IntegrationPatience:
 
   override def fakeApplication(): Application =
     new GuiceApplicationBuilder()
@@ -44,10 +43,11 @@ class ReportControllerSpec
   private val client = app.injector.instanceOf[WSClient]
   private val baseUrl = s"http://localhost:$port/content-security-policy-reports"
 
-  "POST /:service/report" should {
-    "return 200 when receiving a valid CSP Report" in {
+  "POST /:service/report" should:
+    "return 200 when receiving a valid CSP Report" in:
       val response =
-        client.url(s"$baseUrl/test-service")
+        client
+          .url(s"$baseUrl/test-service")
           .withHttpHeaders(CONTENT_TYPE -> "application/csp-report")
           .post(
             s"""
@@ -66,11 +66,11 @@ class ReportControllerSpec
           ).futureValue
 
       response.status shouldBe 200
-    }
 
-    "return 400 when receiving an invalid CSP Report" in {
+    "return 400 when receiving an invalid CSP Report" in:
       val response =
-        client.url(s"$baseUrl/test-service")
+        client
+          .url(s"$baseUrl/test-service")
           .withHttpHeaders(CONTENT_TYPE -> "application/json")
           .post(
             s"""
@@ -81,6 +81,3 @@ class ReportControllerSpec
           ).futureValue
 
       response.status shouldBe 400
-    }
-  }
-}
