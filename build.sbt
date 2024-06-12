@@ -2,7 +2,7 @@ import play.sbt.PlayImport.PlayKeys.playDefaultPort
 import uk.gov.hmrc.DefaultBuildSettings
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / scalaVersion := "3.3.3"
 
 lazy val microservice = Project("content-security-policy-reports", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
@@ -15,7 +15,7 @@ lazy val microservice = Project("content-security-policy-reports", file("."))
   )
 
 lazy val it =
-    (project in file("it"))
-      .enablePlugins(PlayScala)
-      .dependsOn(microservice % "test->test")
-      .settings(DefaultBuildSettings.itSettings)
+  (project in file("it"))
+    .enablePlugins(PlayScala)
+    .dependsOn(microservice % "test->test")
+    .settings(DefaultBuildSettings.itSettings())

@@ -28,27 +28,23 @@ import javax.inject.Singleton
 import scala.concurrent.Future
 
 @Singleton
-class JsonErrorHandler extends HttpErrorHandler {
+class JsonErrorHandler extends HttpErrorHandler:
   private val logger = Logger(getClass)
 
   override def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] =
     Future.successful(Status(statusCode)(toJson(ErrorResponse(statusCode, message))))
 
-  override def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = {
+  override def onServerError(request: RequestHeader, exception: Throwable): Future[Result] =
     logger.error(s"! Internal server error, for (${request.method}) [${request.uri}] -> ", exception)
     val errorResponse = ErrorResponse(INTERNAL_SERVER_ERROR, "Unexpected error")
-
     Future.successful(Status(errorResponse.statusCode)(toJson(errorResponse)))
-  }
-}
 
 case class ErrorResponse(
-                          statusCode: Int,
-                          message: String,
-                          xStatusCode: Option[String] = None,
-                          requested: Option[String]   = None
-                        )
+  statusCode : Int,
+  message    : String,
+  xStatusCode: Option[String] = None,
+  requested  : Option[String] = None
+)
 
-object ErrorResponse {
+object ErrorResponse:
   implicit val format: OFormat[ErrorResponse] = Json.format[ErrorResponse]
-}
