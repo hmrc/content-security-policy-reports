@@ -39,24 +39,41 @@ class ReportController @Inject()(
     cspReportAction:
       implicit request =>
         val mdc =
-          ("reporting-service" -> service) ::
-            request
-              .headers
-              .get(HeaderNames.USER_AGENT)
-              .toList
-              .flatMap:
-                userAgent => List("user-agent" -> userAgent)
+          Map("reporting-service" -> service)
+            ++ toMap(request.body)
+            ++ request.headers.get(HeaderNames.USER_AGENT)
+                 .toList
+                 .flatMap: userAgent =>
+                   List("user-agent" -> userAgent)
+                 .toMap
 
-        withMdc(mdc.toMap):
+        withMdc(mdc):
           cspLogger.info(Json.prettyPrint(Json.toJson(request.body)))
 
         Ok
 
+  private def toMap(cspReport: ScalaCSPReport): Map[String, String] =
+    def opt: Option[String] => String = _.getOrElse("-")
+    Map(
+      "document-uri"        ->     cspReport.documentUri
+    , "violated-directive"  ->     cspReport.violatedDirective
+    , "blocked-uri"         -> opt(cspReport.blockedUri)
+    , "original-policy"     -> opt(cspReport.originalPolicy)
+    , "effective-directive" -> opt(cspReport.effectiveDirective)
+    , "referrer"            -> opt(cspReport.referrer)
+    , "disposition"         -> opt(cspReport.disposition)
+    , "script-sample"       -> opt(cspReport.scriptSample)
+    , "status-code"         -> opt(cspReport.statusCode.map(_.toString))
+    , "source-file"         -> opt(cspReport.sourceFile)
+    , "line-number"         -> opt(cspReport.lineNumber.map(_.toString))
+    , "column-number"       -> opt(cspReport.columnNumber.map(_.toString))
+    )
+
   private def withMdc[A](mdc: Map[String, String])(block: => A): A =
     val oldMdcData = MDC.getCopyOfContextMap
     try
-      mdc.foreach:
-        (k, v) => MDC.put(k, v)
+      mdc.foreach: (k, v) =>
+        MDC.put(k, v)
       block
     finally
       if oldMdcData != null then
