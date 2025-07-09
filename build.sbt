@@ -3,6 +3,7 @@ import uk.gov.hmrc.DefaultBuildSettings
 
 ThisBuild / majorVersion := 0
 ThisBuild / scalaVersion := "3.3.6"
+ThisBuild / scalacOptions += "-Wconf:msg=Flag.*repeatedly:s"
 
 lazy val microservice = Project("content-security-policy-reports", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
