@@ -1,3 +1,6 @@
 # microservice specific routes
 + nocsrf
 POST       /:service                uk.gov.hmrc.contentsecuritypolicyreports.controllers.ReportController.report(service: String)
++ nocsrf
+POST       /report-to/:service                uk.gov.hmrc.contentsecuritypolicyreports.controllers.ReportController.reportTo(service: String)
+OPTIONS    /report-to/:service                uk.gov.hmrc.contentsecuritypolicyreports.controllers.ReportController.reportToCORSPreFlight(service: String)
