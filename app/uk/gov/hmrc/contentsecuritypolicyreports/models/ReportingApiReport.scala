@@ -36,7 +36,7 @@ object CspViolationReportBody:
   given Reads[CspViolationReportBody] = Json.reads[CspViolationReportBody]
 
 case class ReportingApiReport(
-  original : JsObject,
+  `type` : JsObject,
   body     : JsObject,
   age      : Option[Long],
   userAgent: Option[String]
@@ -45,7 +45,7 @@ case class ReportingApiReport(
 object ReportingApiReport:
   given Reads[ReportingApiReport] = Reads: json =>
     for
-      original <- json.validate[JsObject]
+      `type` <- json.validate[JsObject]
       _ <- (__ \ "type").read[String]
              .filter(JsonValidationError("Expected csp-violation"))(_ == "csp-violation")
              .reads(json)
@@ -56,4 +56,4 @@ object ReportingApiReport:
              .filter(JsonValidationError("Expected non-negative age"))(_.forall(_ >= 0))
              .reads(json)
       userAgent <- (__ \ "user_agent").readNullable[String].reads(json)
-    yield ReportingApiReport(original, body, age, userAgent)
+    yield ReportingApiReport(`type`, body, age, userAgent)
