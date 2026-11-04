@@ -45,6 +45,7 @@ case class ReportingApiReport(
 object ReportingApiReport:
   given Reads[ReportingApiReport] = Reads: json =>
     for
+        // TODO: rename type
       `type` <- json.validate[JsObject]
       _ <- (__ \ "type").read[String]
              .filter(JsonValidationError("Expected csp-violation"))(_ == "csp-violation")

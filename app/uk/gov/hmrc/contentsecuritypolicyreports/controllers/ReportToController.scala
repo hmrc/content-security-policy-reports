@@ -59,15 +59,6 @@ class ReportToController @Inject()(
       )
 
   def reportTo(service: String): Action[JsValue] =
-    def logRejection(request: RequestHeader): Unit =
-      val mdc = Map(
-        "reporting-service" -> service,
-        "reporting-api" -> "report-to",
-        "user-agent" -> request.headers.get(HeaderNames.USER_AGENT).getOrElse("-")
-      )
-      withMdc(mdc):
-        cspLogger.error("Rejected CSP Reporting API request: expected a JSON array of valid csp-violation reports")
-
     val jsonParser = parse.when(
       _.contentType.contains("application/reports+json"),
       parse.tolerantJson,
@@ -76,10 +67,11 @@ class ReportToController @Inject()(
     val parser: BodyParser[JsValue] = BodyParser: request =>
       jsonParser(request).map {
         case Left(result) if result.header.status == BAD_REQUEST =>
-          logRejection(request)
+          cspLogger.error(s"Rejected CSP Report-to API request from service $service: expected a JSON array of valid csp-violation reports")
           Left(result)
         case result => result
       }(mcc.executionContext)
+      //TODO: is mcc.executionContext still required here if we're not doing any mdc logging anymore?
 
     Action(parser): request =>
       request.body.validate[Seq[ReportingApiReport]] match
@@ -99,6 +91,6 @@ class ReportToController @Inject()(
 
           Ok
         case _ =>
-          logRejection(request)
+          cspLogger.error(s"Rejected CSP Report-to API request from service $service: expected a JSON array of valid csp-violation reports")
           BadRequest(Json.toJson(ErrorResponse(400, "Expected an array of valid CSP reports")))
 
