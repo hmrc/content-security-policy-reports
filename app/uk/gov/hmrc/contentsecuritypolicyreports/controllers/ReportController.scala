@@ -16,15 +16,11 @@
 
 package uk.gov.hmrc.contentsecuritypolicyreports.controllers
 
-import org.slf4j.MDC
-import play.api.Logger
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json.{JsNull, JsString, JsSuccess, JsValue, Json, Writes, __}
-import play.api.mvc.{Action, AnyContent, BodyParser, MessagesControllerComponents, RequestHeader}
+import play.api.libs.json.{Json, Writes, __}
+import play.api.mvc.{Action, MessagesControllerComponents}
 import play.api.http.HeaderNames
 import play.filters.csp.{CSPReportActionBuilder, ScalaCSPReport}
-import uk.gov.hmrc.contentsecuritypolicyreports.config.ErrorResponse
-import uk.gov.hmrc.contentsecuritypolicyreports.models.ReportingApiReport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.contentsecuritypolicyreports.util.CspReportLogger
 

@@ -16,11 +16,8 @@
 
 package uk.gov.hmrc.contentsecuritypolicyreports.controllers
 
-import org.slf4j.MDC
-import play.api.Logger
 import play.api.Logging
-import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json.{JsNull, JsString, JsSuccess, JsValue, Json, Writes, __}
+import play.api.libs.json.{JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BodyParser, MessagesControllerComponents}
 import play.api.http.HeaderNames
 import uk.gov.hmrc.contentsecuritypolicyreports.config.ErrorResponse
@@ -39,7 +36,7 @@ class ReportToController @Inject()(
   def reportToCORSPreFlight(service: String): Action[AnyContent] =
     Action: request =>
       NoContent.withHeaders(
-        HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "*",
+        HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN  -> "*",
         HeaderNames.ACCESS_CONTROL_ALLOW_METHODS -> "POST, OPTIONS",
         HeaderNames.ACCESS_CONTROL_ALLOW_HEADERS -> "Content-Type"
       )
@@ -48,11 +45,11 @@ class ReportToController @Inject()(
     def opt: Option[String] => String = _.getOrElse("-")
     // We don't log `url` as, for CSP violations, this is an identical value to documentURL
     Map(
-        "age"                  -> report.age.toString,
-        "user-agent"           -> report.userAgent,
-        "documentURL"           -> report.body.documentURL,
+        "age"                    -> report.age.toString,
+        "user-agent"             -> report.userAgent,
+        "documentURL"            -> report.body.documentURL,
         "effectiveDirective"     -> report.body.effectiveDirective,
-        "blockedURL"            -> opt(report.body.blockedURL),
+        "blockedURL"             -> opt(report.body.blockedURL),
         "originalPolicy"         -> opt(report.body.originalPolicy),
         "referrer"               -> opt(report.body.referrer),
         "sample"                 -> opt(report.body.sample),
