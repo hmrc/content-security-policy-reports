@@ -36,10 +36,10 @@ object CspViolationReportBody:
   given Reads[CspViolationReportBody] = Json.reads[CspViolationReportBody]
   given Writes[CspViolationReportBody] = Json.writes[CspViolationReportBody]
 
+// Note that we don't capture the "url" field from the Reporting API as, for CSP violation reports, it's identical to the "documentURL" in the report body
 case class ReportingApiReport(
   age      : Long,
   userAgent: String,
-  url      : String,
   body     : CspViolationReportBody,
 )
 
@@ -51,9 +51,8 @@ object ReportingApiReport:
              .filter(JsonValidationError("Expected csp-violation"))(_ == "csp-violation")
              .reads(json)
       age <- (__ \ "age").read[Long].reads(json)
-      url <- (__ \ "url").read[String].reads(json)
       userAgent <- (__ \ "user_agent").read[String].reads(json)
       body <- (__ \ "body").read[CspViolationReportBody].reads(json)
-    yield ReportingApiReport(age, userAgent, url, body)
+    yield ReportingApiReport(age, userAgent, body)
 
   given Writes[ReportingApiReport] = Json.writes[ReportingApiReport]
