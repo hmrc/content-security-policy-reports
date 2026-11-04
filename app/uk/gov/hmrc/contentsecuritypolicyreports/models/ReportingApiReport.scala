@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.contentsecuritypolicyreports.models
 
-import play.api.libs.json.{JsObject, Json, JsonValidationError, Reads, __}
+import play.api.libs.json.{JsObject, Json, JsonValidationError, Reads, Writes, __}
 
 case class CspViolationReportBody(
   documentURL       : String,
@@ -34,27 +34,26 @@ case class CspViolationReportBody(
 
 object CspViolationReportBody:
   given Reads[CspViolationReportBody] = Json.reads[CspViolationReportBody]
+  given Writes[CspViolationReportBody] = Json.writes[CspViolationReportBody]
 
 case class ReportingApiReport(
-  `type` : JsObject,
-  body     : JsObject,
-  age      : Option[Long],
-  userAgent: Option[String]
+  age      : Long,
+  userAgent: String,
+  url      : String,
+  body     : CspViolationReportBody,
 )
 
 object ReportingApiReport:
   given Reads[ReportingApiReport] = Reads: json =>
     for
-        // TODO: rename type
-      `type` <- json.validate[JsObject]
+    // The reporting API could, in theory, include other types of reports - but we only care about and expect csp-violation reports
       _ <- (__ \ "type").read[String]
              .filter(JsonValidationError("Expected csp-violation"))(_ == "csp-violation")
              .reads(json)
-      body <- (__ \ "body").read[JsObject].reads(json)
-      _ <- body.validate[CspViolationReportBody]
-      _ <- (__ \ "url").readNullable[String].reads(json)
-      age <- (__ \ "age").readNullable[Long]
-             .filter(JsonValidationError("Expected non-negative age"))(_.forall(_ >= 0))
-             .reads(json)
-      userAgent <- (__ \ "user_agent").readNullable[String].reads(json)
-    yield ReportingApiReport(`type`, body, age, userAgent)
+      age <- (__ \ "age").read[Long].reads(json)
+      url <- (__ \ "url").read[String].reads(json)
+      userAgent <- (__ \ "user_agent").read[String].reads(json)
+      body <- (__ \ "body").read[CspViolationReportBody].reads(json)
+    yield ReportingApiReport(age, userAgent, url, body)
+
+  given Writes[ReportingApiReport] = Json.writes[ReportingApiReport]

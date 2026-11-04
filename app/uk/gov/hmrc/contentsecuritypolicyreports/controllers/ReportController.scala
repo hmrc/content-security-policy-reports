@@ -26,6 +26,7 @@ import play.filters.csp.{CSPReportActionBuilder, ScalaCSPReport}
 import uk.gov.hmrc.contentsecuritypolicyreports.config.ErrorResponse
 import uk.gov.hmrc.contentsecuritypolicyreports.models.ReportingApiReport
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.contentsecuritypolicyreports.util.CspReportLogger
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
@@ -35,8 +36,6 @@ class ReportController @Inject()(
   mcc             : MessagesControllerComponents
 , cspReportAction: CSPReportActionBuilder
 ) extends FrontendController(mcc):
-
-  private val cspLogger = Logger("csp-report-logger")
 
   def report(service: String): Action[ScalaCSPReport] =
     cspReportAction:
@@ -50,9 +49,8 @@ class ReportController @Inject()(
                    List("user-agent" -> userAgent)
                  .toMap
 
-        withMdc(mdc):
-          cspLogger.info(Json.prettyPrint(Json.toJson(request.body)))
-
+        CspReportLogger.info(mdc)(Json.prettyPrint(Json.toJson(request.body)))
+        
         Ok
 
   private def toMap(cspReport: ScalaCSPReport): Map[String, String] =
@@ -71,18 +69,6 @@ class ReportController @Inject()(
     , "line-number"         -> opt(cspReport.lineNumber.map(_.toString))
     , "column-number"       -> opt(cspReport.columnNumber.map(_.toString))
     )
-
-  private def withMdc[A](mdc: Map[String, String])(block: => A): A =
-    val oldMdcData = MDC.getCopyOfContextMap
-    try
-      mdc.foreach: (k, v) =>
-        MDC.put(k, v)
-      block
-    finally
-      if oldMdcData != null then
-        MDC.setContextMap(oldMdcData)
-      else
-        MDC.clear()
 
   given Writes[ScalaCSPReport] =
     ( (__ \ "csp-report" \ "document-uri"       ).write[String]
