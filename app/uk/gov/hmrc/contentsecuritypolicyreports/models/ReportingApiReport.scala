@@ -37,9 +37,10 @@ object CspViolationReportBody:
   given Writes[CspViolationReportBody] = Json.writes[CspViolationReportBody]
 
 // Note that we don't capture the "url" field from the Reporting API as, for CSP violation reports, it's identical to the "documentURL" in the report body
+// Unlike Firefox and Chrome, Safari does not necessarily include age and user-agent fields in the report envelope, so we make them optional here
 case class ReportingApiReport(
-  age      : Long,
-  userAgent: String,
+  age      : Option[Long],
+  userAgent: Option[String],
   body     : CspViolationReportBody,
 )
 
@@ -50,8 +51,8 @@ object ReportingApiReport:
       _ <- (__ \ "type").read[String]
              .filter(JsonValidationError("Expected csp-violation"))(_ == "csp-violation")
              .reads(json)
-      age <- (__ \ "age").read[Long].reads(json)
-      userAgent <- (__ \ "user_agent").read[String].reads(json)
+      age <- (__ \ "age").readNullable[Long].reads(json)
+      userAgent <- (__ \ "user_agent").readNullable[String].reads(json)
       body <- (__ \ "body").read[CspViolationReportBody].reads(json)
     yield ReportingApiReport(age, userAgent, body)
 

@@ -18,7 +18,7 @@ package uk.gov.hmrc.contentsecuritypolicyreports.controllers
 
 import play.api.Logging
 import play.api.http.HeaderNames
-import play.api.libs.json.{JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsArray, JsError, JsObject, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BodyParser, MessagesControllerComponents}
 import uk.gov.hmrc.contentsecuritypolicyreports.config.ErrorResponse
 import uk.gov.hmrc.contentsecuritypolicyreports.models.ReportingApiReport
@@ -45,8 +45,8 @@ class ReportToController @Inject()(
     def opt: Option[String] => String = _.getOrElse("-")
     // We don't log `url` as, for CSP violations, this is an identical value to documentURL
     Map(
-        "age"                    -> report.age.toString,
-        "user-agent"             -> report.userAgent,
+        "age"                    -> opt(report.age.map(_.toString)),
+        "user-agent"             -> opt(report.userAgent),
         "documentURL"            -> report.body.documentURL,
         "effectiveDirective"     -> report.body.effectiveDirective,
         "blockedURL"             -> opt(report.body.blockedURL),
@@ -61,9 +61,10 @@ class ReportToController @Inject()(
         )
 
   def reportTo(service: String): Action[JsValue] =
-    // Default parser will not accept "application/reports+json" content type, so we define a custom parser for it
+    // Default parser will not accept "application/reports+json" content type, so we define a custom parser for it.
+    // Spec states that only content type application/reports+json should be used but Safari uses application/csp-report, so we accept that too.
     val jsonParser = parse.when(
-      _.contentType.contains("application/reports+json"),
+      _.contentType.exists(ct => ct == "application/reports+json" || ct == "application/csp-report"),
       parse.tolerantJson,
       _ => Future.successful(UnsupportedMediaType(Json.toJson(ErrorResponse(415, "Expected application/reports+json"))))
     )
@@ -76,7 +77,12 @@ class ReportToController @Inject()(
       }(mcc.executionContext)
 
     Action(parser): request =>
-      request.body.validate[Seq[ReportingApiReport]] match
+      // We expect an array of reports, even if there's just one, but Safari always sends a single object so we account for both.
+      val reports = request.body match
+        case _: JsObject => request.body.validate[ReportingApiReport].map(Seq(_))
+        case _           => request.body.validate[Seq[ReportingApiReport]]
+
+      reports match
         case JsSuccess(reports, _) =>
           reports.foreach: report =>
             val mdc = toMap(report) ++
@@ -85,6 +91,7 @@ class ReportToController @Inject()(
             CspReportLogger.info(mdc)(Json.prettyPrint(Json.toJson(report)))
 
           Ok
-        case _ =>
-          logger.error(s"Rejected CSP Report-to API request from service $service: expected a JSON array of valid csp-violation reports")
-          BadRequest(Json.toJson(ErrorResponse(400, "Expected an array of valid CSP reports")))
+        case error: JsError =>
+          val validationDetails = Json.stringify(JsError.toJson(error))
+          logger.error(s"Rejected CSP Report-to API request from service $service: invalid report format: $validationDetails")
+          BadRequest(Json.toJson(ErrorResponse(400, "Expected a valid CSP report or an array of valid CSP reports")))
