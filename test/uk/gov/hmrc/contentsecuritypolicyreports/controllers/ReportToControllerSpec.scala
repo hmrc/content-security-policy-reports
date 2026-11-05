@@ -22,19 +22,15 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import org.slf4j.{LoggerFactory, MDC}
+import org.slf4j.LoggerFactory
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsNull, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.{WSClient, WSResponse, writeableOf_String}
-import play.api.mvc.{DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import play.filters.csp.CSPReportActionBuilder
+import play.api.test.Helpers.*
 
 import java.util.concurrent.CopyOnWriteArrayList
-import scala.concurrent.ExecutionContext
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 class ReportToControllerSpec
   extends AnyWordSpec

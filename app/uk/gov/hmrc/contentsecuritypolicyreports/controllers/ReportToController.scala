@@ -17,13 +17,13 @@
 package uk.gov.hmrc.contentsecuritypolicyreports.controllers
 
 import play.api.Logging
+import play.api.http.HeaderNames
 import play.api.libs.json.{JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BodyParser, MessagesControllerComponents}
-import play.api.http.HeaderNames
 import uk.gov.hmrc.contentsecuritypolicyreports.config.ErrorResponse
 import uk.gov.hmrc.contentsecuritypolicyreports.models.ReportingApiReport
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.contentsecuritypolicyreports.util.CspReportLogger
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future

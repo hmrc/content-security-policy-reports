@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.contentsecuritypolicyreports.models
 
-import play.api.libs.json.{JsObject, Json, JsonValidationError, Reads, Writes, __}
+import play.api.libs.json.*
 
 case class CspViolationReportBody(
   documentURL       : String,

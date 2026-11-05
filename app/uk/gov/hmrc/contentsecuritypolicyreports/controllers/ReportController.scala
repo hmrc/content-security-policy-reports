@@ -16,16 +16,15 @@
 
 package uk.gov.hmrc.contentsecuritypolicyreports.controllers
 
+import play.api.http.HeaderNames
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{Json, Writes, __}
 import play.api.mvc.{Action, MessagesControllerComponents}
-import play.api.http.HeaderNames
 import play.filters.csp.{CSPReportActionBuilder, ScalaCSPReport}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.contentsecuritypolicyreports.util.CspReportLogger
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
 
 @Singleton
 class ReportController @Inject()(
