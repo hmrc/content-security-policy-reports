@@ -16,13 +16,12 @@
 
 package uk.gov.hmrc.contentsecuritypolicyreports.controllers
 
-import org.slf4j.MDC
-import play.api.Logger
+import play.api.http.HeaderNames
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{Json, Writes, __}
 import play.api.mvc.{Action, MessagesControllerComponents}
-import play.api.http.HeaderNames
 import play.filters.csp.{CSPReportActionBuilder, ScalaCSPReport}
+import uk.gov.hmrc.contentsecuritypolicyreports.util.CspReportLogger
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import javax.inject.{Inject, Singleton}
@@ -33,13 +32,11 @@ class ReportController @Inject()(
 , cspReportAction: CSPReportActionBuilder
 ) extends FrontendController(mcc):
 
-  private val cspLogger = Logger("csp-report-logger")
-
   def report(service: String): Action[ScalaCSPReport] =
     cspReportAction:
       implicit request =>
         val mdc =
-          Map("reporting-service" -> service)
+          Map("reporting-service" -> service, "reporting-api" -> "report-uri")
             ++ toMap(request.body)
             ++ request.headers.get(HeaderNames.USER_AGENT)
                  .toList
@@ -47,9 +44,8 @@ class ReportController @Inject()(
                    List("user-agent" -> userAgent)
                  .toMap
 
-        withMdc(mdc):
-          cspLogger.info(Json.prettyPrint(Json.toJson(request.body)))
-
+        CspReportLogger.info(mdc)(Json.prettyPrint(Json.toJson(request.body)))
+        
         Ok
 
   private def toMap(cspReport: ScalaCSPReport): Map[String, String] =
@@ -68,18 +64,6 @@ class ReportController @Inject()(
     , "line-number"         -> opt(cspReport.lineNumber.map(_.toString))
     , "column-number"       -> opt(cspReport.columnNumber.map(_.toString))
     )
-
-  private def withMdc[A](mdc: Map[String, String])(block: => A): A =
-    val oldMdcData = MDC.getCopyOfContextMap
-    try
-      mdc.foreach: (k, v) =>
-        MDC.put(k, v)
-      block
-    finally
-      if oldMdcData != null then
-        MDC.setContextMap(oldMdcData)
-      else
-        MDC.clear()
 
   given Writes[ScalaCSPReport] =
     ( (__ \ "csp-report" \ "document-uri"       ).write[String]

@@ -23,7 +23,7 @@
 
     <appender name="CSP_REPORT_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%date{ISO8601} level=%highlight([%level]) logger=[%logger] thread=[%thread] reporting-service=[%X{reporting-service}] user-agent=[%X{user-agent}]  message=[%message]</pattern>
+            <pattern>%date{ISO8601} level=%highlight([%level]) logger=[%logger] thread=[%thread] reporting-service=[%X{reporting-service}] reporting-api=[%X{reporting-api}] user-agent=[%X{user-agent}]  message=[%message]</pattern>
         </encoder>
     </appender>
 
